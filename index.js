@@ -1,7 +1,9 @@
+// Import necessary modules
 const express = require('express');
 const ytdl = require('@distube/ytdl-core');
 const ytSearch = require('yt-search');
 
+// Initialize Express app
 const app = express();
 const port = 3000;
 
@@ -17,8 +19,8 @@ app.get('/video', async (req, res) => {
     let videoUrl;
     let videoDetails;
 
-    if (ytdl.validateURL(query)) {
-      videoUrl = query;
+    if (ytdl.validateURL(query.trim())) {
+      videoUrl = query.trim();
       const videoInfo = await ytdl.getInfo(videoUrl);
       videoDetails = {
         title: videoInfo.videoDetails.title,
@@ -26,7 +28,7 @@ app.get('/video', async (req, res) => {
         thumbnail: videoInfo.videoDetails.thumbnails[0].url,
       };
     } else {
-      const searchResult = await ytSearch(query);
+      const searchResult = await ytSearch(query.trim());
       const video = searchResult.videos[0];
 
       if (!video) {
@@ -98,7 +100,6 @@ app.get('/download-mp3', async (req, res) => {
     res.header('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '')}.mp3"`);
     res.header('Content-Type', 'audio/mpeg');
 
-    // Stream the highest quality audio without compression
     ytdl(videoUrl, { quality: 'highestaudio', filter: 'audioonly' }).pipe(res);
   } catch (error) {
     console.error(error);
